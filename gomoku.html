@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五子棋游戏</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+        }
+
+        .current-player {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .player-black {
+            color: #000;
+        }
+
+        .player-white {
+            color: #666;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(15, 30px);
+            grid-template-rows: repeat(15, 30px);
+            gap: 0;
+            background: #deb887;
+            border: 2px solid #8b4513;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #8b4513;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .cell:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stone {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .stone.black {
+            background: radial-gradient(circle at 30% 30%, #444, #000);
+        }
+
+        .stone.white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+            border: 1px solid #ccc;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .winner-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .winner-message h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .winner-message button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>五子棋游戏</h1>
+        <div class="game-info">
+            <div class="current-player">
+                当前玩家: <span id="current-player" class="player-black">黑子</span>
+            </div>
+            <div>
+                回合数: <span id="turn-count">0</span>
+            </div>
+        </div>
+        <div class="board" id="board"></div>
+        <div class="controls">
+            <button id="restart-btn">重新开始</button>
+            <button id="undo-btn">悔棋</button>
+        </div>
+    </div>
+
+    <div class="winner-message" id="winner-message">
+        <h2 id="winner-text">黑子获胜！</h2>
+        <button id="new-game-btn">开始新游戏</button>
+    </div>
+
+    <script>
+        class Gomoku {
+            constructor() {
+                this.board = Array(15).fill().map(() => Array(15).fill(null));
+                this.currentPlayer = 'black';
+                this.gameOver = false;
+                this.moveHistory = [];
+                this.turnCount = 0;
+                
+                this.initializeBoard();
+                this.bindEvents();
+            }
+
+            initializeBoard() {
+                const boardElement = document.getElementById('board');
+                boardElement.innerHTML = '';
+                
+                for (let row = 0; row < 15; row++) {
+                    for (let col = 0; col < 15; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        boardElement.appendChild(cell);
+                    }
+                }
+            }
+
+            bindEvents() {
+                document.getElementById('board').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('cell')) {
+                        this.handleCellClick(e.target);
+                    }
+                });
+
+                document.getElementById('restart-btn').addEventListener('click', () => {
+                    this.restart();
+                });
+
+                document.getElementById('undo-btn').addEventListener('click', () => {
+                    this.undo();
+                });
+
+                document.getElementById('new-game-btn').addEventListener('click', () => {
+                    this.restart();
+                    document.getElementById('winner-message').style.display = 'none';
+                });
+            }
+
+            handleCellClick(cell) {
+                if (this.gameOver) return;
+                
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                if (this.board[row][col] !== null) return;
+                
+                this.placeStone(row, col);
+            }
+
+            placeStone(row, col) {
+                this.board[row][col] = this.currentPlayer;
+                this.moveHistory.push({ row, col, player: this.currentPlayer });
+                this.turnCount++;
+                
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const stone = document.createElement('div');
+                stone.className = `stone ${this.currentPlayer}`;
+                cell.appendChild(stone);
+                
+                if (this.checkWin(row, col)) {
+                    this.endGame();
+                } else {
+                    this.switchPlayer();
+                }
+                
+                this.updateUI();
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'black' ? 'white' : 'black';
+            }
+
+            updateUI() {
+                const playerElement = document.getElementById('current-player');
+                playerElement.textContent = this.currentPlayer === 'black' ? '黑子' : '白子';
+                playerElement.className = this.currentPlayer === 'black' ? 'player-black' : 'player-white';
+                
+                document.getElementById('turn-count').textContent = this.turnCount;
+            }
+
+            checkWin(row, col) {
+                const directions = [
+                    [0, 1],   // 横向
+                    [1, 0],   // 纵向
+                    [1, 1],   // 主对角线
+                    [1, -1]   // 副对角线
+                ];
+
+                for (const [dx, dy] of directions) {
+                    let count = 1;
+                    
+                    // 正方向检查
+                    for (let i = 1; i < 5; i++) {
+                        const newRow = row + i * dx;
+                        const newCol = col + i * dy;
+                        if (newRow < 0 || newRow >= 15 || newCol < 0 || newCol >= 15) break;
+                        if (this.board[newRow][newCol] !== this.currentPlayer) break;
+                        count++;
+                    }
+                    
+                    // 反方向检查
+                    for (let i = 1; i < 5; i++) {
+                        const newRow = row - i * dx;
+                        const newCol = col - i * dy;
+                        if (newRow < 0 || newRow >= 15 || newCol < 0 || newCol >= 15) break;
+                        if (this.board[newRow][newCol] !== this.currentPlayer) break;
+                        count++;
+                    }
+                    
+                    if (count >= 5) return true;
+                }
+                
+                return false;
+            }
+
+            endGame() {
+                this.gameOver = true;
+                const winnerText = document.getElementById('winner-text');
+                winnerText.textContent = `${this.currentPlayer === 'black' ? '黑子' : '白子'}获胜！`;
+                document.getElementById('winner-message').style.display = 'block';
+            }
+
+            restart() {
+                this.board = Array(15).fill().map(() => Array(15).fill(null));
+                this.currentPlayer = 'black';
+                this.gameOver = false;
+                this.moveHistory = [];
+                this.turnCount = 0;
+                this.initializeBoard();
+                this.updateUI();
+            }
+
+            undo() {
+                if (this.moveHistory.length === 0 || this.gameOver) return;
+                
+                const lastMove = this.moveHistory.pop();
+                this.board[lastMove.row][lastMove.col] = null;
+                this.turnCount--;
+                
+                const cell = document.querySelector(`[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`);
+                const stone = cell.querySelector('.stone');
+                if (stone) {
+                    stone.remove();
+                }
+                
+                this.currentPlayer = lastMove.player;
+                this.updateUI();
+            }
+        }
+
+        // 初始化游戏
+        const game = new Gomoku();
+    </script>
+</body>
+</html>
