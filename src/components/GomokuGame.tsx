@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import GameStatus from './GameStatus';
-import GameSettings from './GameSettings';
+import { GameSettings } from './GameSettings';
 import { Player, Position, GameStatus as GameStatusType, GameSettings as GameSettingsType } from '../types/game';
 import { 
   createEmptyBoard, 
