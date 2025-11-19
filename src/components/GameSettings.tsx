@@ -1,10 +1,10 @@
 import React from 'react';
-import { GameSettings, BoardSize, GameTheme } from '../types/game';
+import { GameSettingsConfig, BoardSize, GameTheme } from '../types/game';
 import './GameSettings.css';
 
 interface GameSettingsProps {
-  settings: GameSettings;
-  onSettingsChange: (settings: GameSettings) => void;
+  settings: GameSettingsConfig;
+  onSettingsChange: (settings: GameSettingsConfig) => void;
   onStartGame: () => void;
 }
 

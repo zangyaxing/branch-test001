@@ -18,7 +18,7 @@ export interface GameStatus {
   theme: GameTheme;
 }
 
-export interface GameSettings {
+export interface GameSettingsConfig {
   boardSize: BoardSize;
   theme: GameTheme;
 }

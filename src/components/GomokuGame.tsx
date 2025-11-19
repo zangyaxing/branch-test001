@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import GameStatus from './GameStatus';
 import { GameSettings } from './GameSettings';
-import { Player, Position, GameStatus as GameStatusType, GameSettings as GameSettingsType } from '../types/game';
+import { Player, Position, GameStatus as GameStatusType, GameSettingsConfig } from '../types/game';
 import { 
   createEmptyBoard, 
   checkWinner, 
@@ -14,7 +14,7 @@ import {
 
 const GomokuGame: React.FC = () => {
   const [showSettings, setShowSettings] = useState(true);
-  const [gameSettings, setGameSettings] = useState<GameSettingsType>({
+  const [gameSettings, setGameSettings] = useState<GameSettingsConfig>({
     boardSize: 15,
     theme: 'wood'
   });
@@ -69,7 +69,7 @@ const GomokuGame: React.FC = () => {
     setShowSettings(true);
   }, []);
 
-  const handleSettingsChange = useCallback((newSettings: GameSettingsType) => {
+  const handleSettingsChange = useCallback((newSettings: GameSettingsConfig) => {
     setGameSettings(newSettings);
   }, []);
 
