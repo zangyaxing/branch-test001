@@ -1,6 +1,5 @@
 import React from 'react';
 import { Player, Position } from '../types/game';
-import { BOARD_SIZE } from '../utils/gameLogic';
 import './GameBoard.css';
 
 interface GameBoardProps {
@@ -16,9 +15,19 @@ const GameBoard: React.FC<GameBoardProps> = ({
   lastMove, 
   disabled 
 }) => {
+  const boardSize = board.length;
+  const cellSize = boardSize <= 9 ? 50 : boardSize <= 13 ? 40 : boardSize <= 15 ? 35 : 30;
+  
   return (
     <div className="game-board">
-      <div className="board-grid">
+      <div 
+        className="board-grid"
+        style={{
+          gridTemplateColumns: `repeat(${boardSize}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${boardSize}, ${cellSize}px)`,
+          padding: `${Math.max(10, cellSize / 4)}px`
+        }}
+      >
         {board.map((row, rowIndex) => (
           row.map((cell, colIndex) => {
             const isLastMove = lastMove?.row === rowIndex && lastMove?.col === colIndex;
@@ -30,9 +39,19 @@ const GameBoard: React.FC<GameBoardProps> = ({
                 className={`cell ${cell ? `cell-${cell}` : ''} ${isLastMove ? 'last-move' : ''}`}
                 onClick={() => !disabled && onCellClick(rowIndex, colIndex)}
                 disabled={disabled}
+                style={{
+                  width: `${cellSize}px`,
+                  height: `${cellSize}px`
+                }}
               >
                 {cell && (
-                  <div className={`piece piece-${cell}`}>
+                  <div 
+                    className={`piece piece-${cell}`}
+                    style={{
+                      width: `${cellSize - 4}px`,
+                      height: `${cellSize - 4}px`
+                    }}
+                  >
                     {cell === 'black' && (
                       <svg viewBox="0 0 40 40" className="piece-svg">
                         <circle cx="20" cy="20" r="18" fill="#1a1a1a" />

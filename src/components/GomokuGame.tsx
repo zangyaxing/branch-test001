@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import GameStatus from './GameStatus';
-import { Player, Position, GameStatus as GameStatusType } from '../types/game';
+import GameSettings from './GameSettings';
+import { Player, Position, GameStatus as GameStatusType, GameSettings as GameSettingsType } from '../types/game';
 import { 
-  BOARD_SIZE, 
   createEmptyBoard, 
   checkWinner, 
   isBoardFull, 
@@ -13,8 +13,13 @@ import {
 } from '../utils/gameLogic';
 
 const GomokuGame: React.FC = () => {
-  const [board, setBoard] = useState<Player[][]>(createEmptyBoard());
-  const [gameStatus, setGameStatus] = useState<GameStatusType>(initializeGameStatus());
+  const [showSettings, setShowSettings] = useState(true);
+  const [gameSettings, setGameSettings] = useState<GameSettingsType>({
+    boardSize: 15,
+    theme: 'wood'
+  });
+  const [board, setBoard] = useState<Player[][]>(createEmptyBoard(gameSettings.boardSize));
+  const [gameStatus, setGameStatus] = useState<GameStatusType>(initializeGameStatus(gameSettings.boardSize, gameSettings.theme));
 
   const handleCellClick = useCallback((row: number, col: number) => {
     if (gameStatus.gameState !== 'playing') return;
@@ -50,15 +55,40 @@ const GomokuGame: React.FC = () => {
   }, [board, gameStatus]);
 
   const resetGame = useCallback(() => {
-    setBoard(createEmptyBoard());
-    setGameStatus(initializeGameStatus());
+    setBoard(createEmptyBoard(gameSettings.boardSize));
+    setGameStatus(initializeGameStatus(gameSettings.boardSize, gameSettings.theme));
+  }, [gameSettings]);
+
+  const startNewGame = useCallback(() => {
+    setBoard(createEmptyBoard(gameSettings.boardSize));
+    setGameStatus(initializeGameStatus(gameSettings.boardSize, gameSettings.theme));
+    setShowSettings(false);
+  }, [gameSettings]);
+
+  const backToSettings = useCallback(() => {
+    setShowSettings(true);
   }, []);
 
+  const handleSettingsChange = useCallback((newSettings: GameSettingsType) => {
+    setGameSettings(newSettings);
+  }, []);
+
+  if (showSettings) {
+    return (
+      <GameSettings
+        settings={gameSettings}
+        onSettingsChange={handleSettingsChange}
+        onStartGame={startNewGame}
+      />
+    );
+  }
+
   return (
-    <div className="gomoku-game">
+    <div className={`gomoku-game theme-${gameSettings.theme}`}>
       <GameStatus 
         gameStatus={gameStatus} 
-        onReset={resetGame} 
+        onReset={resetGame}
+        onBackToSettings={backToSettings}
       />
       <GameBoard 
         board={board} 

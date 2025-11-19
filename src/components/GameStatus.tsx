@@ -5,9 +5,10 @@ import './GameStatus.css';
 interface GameStatusProps {
   gameStatus: GameStatusType;
   onReset: () => void;
+  onBackToSettings?: () => void;
 }
 
-const GameStatus: React.FC<GameStatusProps> = ({ gameStatus, onReset }) => {
+const GameStatus: React.FC<GameStatusProps> = ({ gameStatus, onReset, onBackToSettings }) => {
   const getStatusMessage = () => {
     switch (gameStatus.gameState) {
       case 'playing':
@@ -54,12 +55,22 @@ const GameStatus: React.FC<GameStatusProps> = ({ gameStatus, onReset }) => {
         {getStatusMessage()}
         <div className="move-count">{getMoveCount()}</div>
       </div>
-      <button 
-        className="reset-button"
-        onClick={onReset}
-      >
-        🔄 重新开始
-      </button>
+      <div className="status-buttons">
+        {onBackToSettings && (
+          <button 
+            className="settings-button"
+            onClick={onBackToSettings}
+          >
+            ⚙️ 设置
+          </button>
+        )}
+        <button 
+          className="reset-button"
+          onClick={onReset}
+        >
+          🔄 重新开始
+        </button>
+      </div>
     </div>
   );
 };

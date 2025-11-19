@@ -10,6 +10,27 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+/* 主题背景 */
+.gomoku-game.theme-wood {
+  background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b0 50%, #d4a574 100%);
+}
+
+.gomoku-game.theme-stone {
+  background: linear-gradient(135deg, #c0c0c0 0%, #a9a9a9 50%, #8b8680 100%);
+}
+
+.gomoku-game.theme-star {
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b69 100%);
+}
+
+.gomoku-game.theme-ocean {
+  background: linear-gradient(135deg, #006994 0%, #0099cc 50%, #00bfff 100%);
+}
+
+.gomoku-game.theme-forest {
+  background: linear-gradient(135deg, #228b22 0%, #32cd32 50%, #00ff00 100%);
+}
+
 .App-header {
   margin-bottom: 2rem;
 }

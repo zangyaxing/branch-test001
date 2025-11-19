@@ -1,13 +1,13 @@
-import { Player, Position, GameStatus } from '../types/game';
+import { Player, Position, GameStatus, BoardSize, GameTheme } from '../types/game';
 
-export const BOARD_SIZE = 15;
-
-export function createEmptyBoard(): Player[][] {
-  return Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+export function createEmptyBoard(boardSize: BoardSize): Player[][] {
+  return Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
 }
 
 export function checkWinner(board: Player[][], row: number, col: number, player: Player): boolean {
   if (!player) return false;
+  
+  const boardSize = board.length;
 
   const directions = [
     [[0, 1], [0, -1]],   // 水平
@@ -23,7 +23,7 @@ export function checkWinner(board: Player[][], row: number, col: number, player:
       let r = row + dr;
       let c = col + dc;
       
-      while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r][c] === player) {
+      while (r >= 0 && r < boardSize && c >= 0 && c < boardSize && board[r][c] === player) {
         count++;
         r += dr;
         c += dc;
@@ -43,19 +43,22 @@ export function isBoardFull(board: Player[][]): boolean {
 }
 
 export function isValidMove(board: Player[][], row: number, col: number): boolean {
-  return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE && board[row][col] === null;
+  const boardSize = board.length;
+  return row >= 0 && row < boardSize && col >= 0 && col < boardSize && board[row][col] === null;
 }
 
 export function getNextPlayer(currentPlayer: Player): Player {
   return currentPlayer === 'black' ? 'white' : 'black';
 }
 
-export function initializeGameStatus(): GameStatus {
+export function initializeGameStatus(boardSize: BoardSize, theme: GameTheme): GameStatus {
   return {
     currentPlayer: 'black',
     gameState: 'playing',
     winner: null,
     lastMove: null,
-    moveHistory: []
+    moveHistory: [],
+    boardSize,
+    theme
   };
 }
